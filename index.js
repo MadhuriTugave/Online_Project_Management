@@ -5,6 +5,7 @@ const app = express();
 const dotenv = require("dotenv");
 const UserRouter = require("./Routes/UserRoutes");
 const ProjectRoute = require("./Routes/PeojectList");
+const authenticateToken = require("./Authenticate");
 dotenv.config();
 
 const port = process.env.PORT || 5000;
@@ -22,6 +23,9 @@ connection();
 
 //creating user routes for signup and login
 app.use("/User", UserRouter);
+
+ app.use(authenticateToken);
+
 
 // to add a projects in Project List
 app.use("/ProjectList",ProjectRoute);

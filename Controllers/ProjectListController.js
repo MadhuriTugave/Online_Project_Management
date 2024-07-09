@@ -1,5 +1,7 @@
+
 const { User } = require("../Schema/UserSchema");
 const ObjectId = require("mongoose").Types.ObjectId;
+
 
  const AddProjects = async(req ,res)=>{
     // console.log(req.body)
@@ -7,7 +9,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
    try {
      const { theme,reason,category,startDate,type,priority,endDate,department,location,status,division} = req.body;
  
-     const { id } = req.params;
+     const id = req.user._id;
      const user = await User.findOne({_id :id});
     //  console.log(user);
  
@@ -37,11 +39,12 @@ const ObjectId = require("mongoose").Types.ObjectId;
 
 }
 const GetProjects = async (req,res)=>{
+  // console.log(req.user._id ,"user");
       try {
-        const {id} = req.params;
+        const id = req.user._id;
    
     const projects = await User.findById(id).select("AllProjects")
-    console.log(projects.AllProjects.length)
+    // console.log(projects.AllProjects.length)
 
       //if No Project has created then it will give this error
     if (projects.AllProjects.length === 0) {
@@ -57,5 +60,35 @@ const GetProjects = async (req,res)=>{
       }
 }
 
+const UpdateStates = async(req, res)=>{
+   
+    const id = req.user._id;
+    // console.log(id , req.body )
+// console.log(req.params.id)
+  
+    try {
+const user = await User.findById(id);
 
-module.exports={AddProjects,GetProjects};
+const projectIndex = user.AllProjects.findIndex(project => project._id.toString() === req.params.id);
+if (projectIndex === -1) {
+  return res.status(404).send('Project not found');
+}
+// console.log(projectIndex)
+
+ user.AllProjects[projectIndex].status = req.body.status; 
+
+// Save the updated user document
+await user.save();
+
+res.send(user.AllProjects[projectIndex]);
+       
+       
+   
+    } catch (error) {
+      res.status(500).json("server error");
+    }
+   
+}
+
+
+module.exports={AddProjects,GetProjects , UpdateStates};

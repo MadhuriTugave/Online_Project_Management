@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
-const Users = require("../Schema/UserSchema");
+const { User } = require("../Schema/UserSchema");
+
 const ObjectId = require("mongoose").Types.ObjectId;
 
 // Initialize dotenv to load environment variables from.env file
@@ -19,7 +20,7 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.sendStatus(403); // 403 Forbidden
     }
-
+// console.log(user)
     // If user does not exist return 404 Not Found
     if (!user) {
       // If no user exists with the given ID return 401 unauthorized
@@ -27,7 +28,7 @@ const authenticateToken = (req, res, next) => {
     }
 
     // Fetch the user with the given ID
-    const UserData = await Users.findOne(
+    const UserData = await User.findOne(
       { _id: new ObjectId(user._id) },
       { projection: { password_hashed: 0 } }
     );
