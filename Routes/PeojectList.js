@@ -12,4 +12,6 @@ ProjectRoute.get("/",controller.GetProjects);
 //to get all the Projects of that specific user
 ProjectRoute.put("/:id",controller.UpdateStates);
 
+ProjectRoute.get("/department",controller.Department);
+
 module.exports = ProjectRoute;

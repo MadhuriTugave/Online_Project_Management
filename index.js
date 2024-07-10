@@ -24,7 +24,7 @@ connection();
 //creating user routes for signup and login
 app.use("/User", UserRouter);
 
- app.use(authenticateToken);
+ app.use("/ProjectList",authenticateToken);
 
 
 // to add a projects in Project List

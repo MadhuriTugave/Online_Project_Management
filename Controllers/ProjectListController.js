@@ -11,7 +11,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
  
      const id = req.user._id;
      const user = await User.findOne({_id :id});
-    //  console.log(user);
+     console.log(user);
  
      await User.updateOne(
          { _id: id },
@@ -42,6 +42,7 @@ const GetProjects = async (req,res)=>{
   // console.log(req.user._id ,"user");
       try {
         const id = req.user._id;
+        // console.log(req)
    
     const projects = await User.findById(id).select("AllProjects")
     // console.log(projects.AllProjects.length)
@@ -63,7 +64,7 @@ const GetProjects = async (req,res)=>{
 const UpdateStates = async(req, res)=>{
    
     const id = req.user._id;
-    // console.log(id , req.body )
+//     console.log(id , req.body )
 // console.log(req.params.id)
   
     try {
@@ -71,7 +72,7 @@ const user = await User.findById(id);
 
 const projectIndex = user.AllProjects.findIndex(project => project._id.toString() === req.params.id);
 if (projectIndex === -1) {
-  return res.status(404).send('Project not found');
+  return res.status(404).json({message:'Project not found'});
 }
 // console.log(projectIndex)
 
@@ -80,7 +81,7 @@ if (projectIndex === -1) {
 // Save the updated user document
 await user.save();
 
-res.send(user.AllProjects[projectIndex]);
+res.json(user.AllProjects[projectIndex]);
        
        
    
@@ -90,5 +91,31 @@ res.send(user.AllProjects[projectIndex]);
    
 }
 
+const Department = async (req, res) => {
+  try {
+      const results = await User.aggregate([
+          { $unwind: '$AllProjects' },
+          {
+              $group: {
+                  _id: '$AllProjects.Department',
+                  total_registered: { $sum: 1 },
+                  total_closed: { $sum: { $cond: [{ $eq: ['$AllProjects.status', 'closed'] }, 1, 0] } }
+              }
+          }
+      ]);
 
-module.exports={AddProjects,GetProjects , UpdateStates};
+      const data = results.map(result => ({
+          department: result._id,
+          total_registered: result.total_registered,
+          total_closed: result.total_closed
+      }));
+
+      res.json(data);
+  } catch (error) {
+      // console.error(error);
+      res.status(500).send('Server error');
+  }
+}
+
+
+module.exports={AddProjects,GetProjects , UpdateStates, Department};
