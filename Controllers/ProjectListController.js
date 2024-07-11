@@ -94,7 +94,11 @@ res.json(user.AllProjects[projectIndex]);
 
 const Department = async (req, res) => {
   try {
+    const id = req.user._id;
+    // const user = await User.findById(id);
+    // console.log(id)
       const results = await User.aggregate([
+        { $match: { _id: new ObjectId(id) } },
           { $unwind: '$AllProjects' },
           {
               $group: {
