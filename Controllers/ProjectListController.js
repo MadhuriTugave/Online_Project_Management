@@ -11,7 +11,7 @@ const ObjectId = require("mongoose").Types.ObjectId;
  
      const id = req.user._id;
      const user = await User.findOne({_id :id});
-     console.log(user);
+    //  console.log(user);
  
      await User.updateOne(
          { _id: id },
@@ -52,7 +52,7 @@ const GetProjects = async (req,res)=>{
         return res.status(404).json({ message: 'You havent created any project !!!' });
       }
 
-    // sending project as a json   
+    // sending project list as a json   
     res.status(200).json(projects.AllProjects);
 
       } catch (error) {
@@ -71,10 +71,11 @@ const UpdateStates = async(req, res)=>{
 const user = await User.findById(id);
 
 const projectIndex = user.AllProjects.findIndex(project => project._id.toString() === req.params.id);
+// console.log(projectIndex)
 if (projectIndex === -1) {
   return res.status(404).json({message:'Project not found'});
 }
-// console.log(projectIndex)
+
 
  user.AllProjects[projectIndex].status = req.body.status; 
 
@@ -99,11 +100,11 @@ const Department = async (req, res) => {
               $group: {
                   _id: '$AllProjects.Department',
                   total_registered: { $sum: 1 },
-                  total_closed: { $sum: { $cond: [{ $eq: ['$AllProjects.status', 'closed'] }, 1, 0] } }
+                  total_closed: { $sum: { $cond: [{ $eq: ['$AllProjects.status', 'Closed'] }, 1, 0] } }
               }
           }
       ]);
-
+// console.log(results);
       const data = results.map(result => ({
           department: result._id,
           total_registered: result.total_registered,
@@ -113,7 +114,7 @@ const Department = async (req, res) => {
       res.json(data);
   } catch (error) {
       // console.error(error);
-      res.status(500).send('Server error');
+      res.status(500).json('Server error');
   }
 }
 

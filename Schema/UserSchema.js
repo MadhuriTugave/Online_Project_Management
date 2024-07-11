@@ -62,9 +62,10 @@ const UserSchema = new mongoose.Schema({
     ]
 });
 
-
-
 const User = mongoose.model("UserProject",UserSchema);
 
 
 module.exports={ User }
+
+
+

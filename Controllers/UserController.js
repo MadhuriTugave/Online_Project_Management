@@ -5,6 +5,7 @@ const { User } = require("../Schema/UserSchema");
 const KEY = process.env.JWT_SECRET_KEY;
 // console.log(KEY);
 
+
 const SignUp = async (req,res)=>{
     // console.log(req.body.email, req.body.password)
     try {
@@ -56,6 +57,7 @@ const SignUp = async (req,res)=>{
 }
 
 const Login = async(req,res)=>{
+  console.log(req.body.email)
 
    try {
      const user = await  User.findOne({email:req.body.email});
