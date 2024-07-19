@@ -122,5 +122,65 @@ const Department = async (req, res) => {
   }
 }
 
+const searchResult = async (req, res)=>{
+        //  console.log(req.query)
+         try {
+          const id = req.user._id;
+           let searchValue = req.query.query;
+       
+           const user = await User.findById(id);
 
-module.exports={AddProjects,GetProjects , UpdateStates, Department};
+    //  console.log(searchValue ,";;;;")
+         const results = user.AllProjects.filter(project => {
+          return (
+            project.ProjectName.includes(searchValue) ||
+            project.Reason.includes(searchValue) ||
+            project.Category.includes(searchValue) ||
+            project.Type.includes(searchValue) ||
+            project.Priority.includes(searchValue) ||
+            project.Department.includes(searchValue) ||
+            project.Location.includes(searchValue) ||
+            project.status.includes(searchValue) ||
+            project.Division.includes(searchValue) ||
+            (project.StartDate instanceof Date && project.StartDate.toISOString().includes(searchValue)) || // Check if StartDate is a Date object
+            (project.EndDate instanceof Date && project.EndDate.toISOString().includes(searchValue)) // Check if EndDate is a Date object
+          );
+        });
+      
+            // console.log(results)
+          res.json(results)
+         } catch (error) {
+          console.log(error);
+         }
+
+
+}
+
+const GetCardData = async(req,res)=>{
+       try {
+        const id = req.user._id;
+        const results = await User.aggregate([
+          { $match: { _id: new ObjectId(id) } },
+            { $unwind: '$AllProjects' },
+            {
+                $group: {
+                 _id :null,
+                    total_Projects:{$sum : 1},
+                    total_Cancelled: { $sum: { $cond: [{ $eq: ['$AllProjects.status', 'Cancelled'] }, 1, 0] } },
+                    total_Running: { $sum: { $cond: [{ $eq: ['$AllProjects.status', 'Running'] }, 1, 0] } },
+                    total_Closed: { $sum: { $cond: [{ $eq: ['$AllProjects.status', 'Closed'] }, 1, 0] } },
+                    total_delay: { $sum: { $cond: [{
+                       $and: [ { $eq :['$AllProjects.status', 'Running'] },
+                        { $lt: ['$AllProjects.EndDate', new Date()] }
+                       ] }, 1, 0] } }
+                }
+            }
+        ]); 
+       res.status(201).json(results);   
+       } catch (error) {
+         console.log(error);
+       }
+}
+
+
+module.exports={AddProjects,GetProjects , UpdateStates, Department ,searchResult , GetCardData};

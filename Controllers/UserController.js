@@ -60,44 +60,79 @@ const Login = async(req,res)=>{
   console.log(req.body.email)
 
    try {
-     const user = await  User.findOne({email:req.body.email});
+    // Regex to validate the email address
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  if(emailRegex.test(req.body.email)){
+    const user = await  User.findOne({email:req.body.email});
+  // console.log(user)
+    if(!user){
+      // Hash the password
+     const hashedPassword = await bcrypt.hash( req.body.password, 12);
+       // Save the user to the database
+       const userCreated = await User.create({email:req.body.email,  password_hashed: hashedPassword});
+        // Create a Response object to send back to the client with sensitive data excluded
+     const responseUser = {
+       _id: userCreated._id,
+       email: req.body.email,
+     };
+
+     // Generate an access token for the newly created user
+     const accessToken = jwt.sign(
+       { _id: userCreated._id },
+       KEY,
+       {
+         expiresIn: "1h",
+       }
+     );
  
-     if(!user){
-        return res
-          .status(404) // 404 Not Found
-          .json({ success: false, message: "User does not exist please SignUp!!" });
-          }
-     const isPasswordMatch = await bcrypt.compare(
-        req.body.password,
-        user.password_hashed
-     ) 
-    //  console.log(isPasswordMatch)
-     if (!isPasswordMatch) {
-        return res
-          .status(401)
-          .json({ success: false, message: "Invalid password" }); // 401 Unauthorized
-      }
-       // Create a Response object to send back to the client with sensitive data excluded
-       const responseUser = {
-        _id: user._id,
-        email: user.email,
-      };
-      // Generate an access token for the user
-      const accessToken = jwt.sign({ _id: user._id }, KEY, {
-        expiresIn: "1h",
-      });
-       // Send the response back to the client
-       res.status(200).json({
-        success: true,
-        message: "Login successfull.",
-        user: responseUser,
-        access_token: accessToken,
-        token_type: "Bearer",
-        expiresIn: "3600",
-      });
+     // Send the response back to the client
+     res.status(201).json({
+       user: responseUser,
+       access_token: accessToken,
+       token_type: "Bearer",
+       expiresIn: "3600",
+     });
+    
+         }else{
+
+           const isPasswordMatch = await bcrypt.compare(
+             req.body.password,
+             user.password_hashed
+          ) 
+         //  console.log(isPasswordMatch)
+          if (!isPasswordMatch) {
+             return res
+               .status(401)
+               .json({ success: false, message: "Invalid Credentials" }); // 401 Unauthorized
+           }
+            // Create a Response object to send back to the client with sensitive data excluded
+            const responseUser = {
+             _id: user._id,
+             email: user.email,
+           };
+           // Generate an access token for the user
+           const accessToken = jwt.sign({ _id: user._id }, KEY, {
+             expiresIn: "1h",
+           });
+            // Send the response back to the client
+            res.status(200).json({
+             user: responseUser,
+             access_token: accessToken,
+             token_type: "Bearer",
+             expiresIn: "3600",
+           });
+
+         }
+   
+  } else{
+    res.status(401).json({
+     success: false,
+      message: "Invalid credentials "
+    });
+  }  
    } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Error in logging " });
+    res.status(500).json({ success: false, message: "Invalid credentials " });
    }
 
 }
