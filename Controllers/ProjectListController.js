@@ -127,23 +127,29 @@ const searchResult = async (req, res)=>{
          try {
           const id = req.user._id;
            let searchValue = req.query.query;
+           const capitalizeFirstLetter = (str) => {
+            if (str.length === 0) return str; // handleing empty string
+            return str.charAt(0).toUpperCase() + str.slice(1);
+          };
+          const capitalizedString = capitalizeFirstLetter(searchValue);
+          // console.log(capitalizedString)
        
            const user = await User.findById(id);
 
     //  console.log(searchValue ,";;;;")
          const results = user.AllProjects.filter(project => {
           return (
-            project.ProjectName.includes(searchValue) ||
-            project.Reason.includes(searchValue) ||
-            project.Category.includes(searchValue) ||
-            project.Type.includes(searchValue) ||
-            project.Priority.includes(searchValue) ||
-            project.Department.includes(searchValue) ||
-            project.Location.includes(searchValue) ||
-            project.status.includes(searchValue) ||
-            project.Division.includes(searchValue) ||
-            (project.StartDate instanceof Date && project.StartDate.toISOString().includes(searchValue)) || // Check if StartDate is a Date object
-            (project.EndDate instanceof Date && project.EndDate.toISOString().includes(searchValue)) // Check if EndDate is a Date object
+            project.ProjectName.includes(capitalizedString) ||
+            project.Reason.includes(capitalizedString) ||
+            project.Category.includes(capitalizedString) ||
+            project.Type.includes(capitalizedString) ||
+            project.Priority.includes(capitalizedString) ||
+            project.Department.includes(capitalizedString) ||
+            project.Location.includes(capitalizedString) ||
+            project.status.includes(capitalizedString) ||
+            project.Division.includes(capitalizedString) ||
+            (project.StartDate instanceof Date && project.StartDate.toISOString().includes(capitalizedString)) || // Check if StartDate is a Date object
+            (project.EndDate instanceof Date && project.EndDate.toISOString().includes(capitalizedString)) // Check if EndDate is a Date object
           );
         });
       
