@@ -147,7 +147,7 @@ const ForgotPassword = async (req, res) => {
       from: "dalvemadhuri974@gmail.com",
       to: email,
       subject: "Resate Youe Password",
-      text: `http://localhost:3000/reset_Password/${user._id}/${token}`,
+      text: `https://projecmanagement.netlify.app/reset_Password/${user._id}/${token}`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {
